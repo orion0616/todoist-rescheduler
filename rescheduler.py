@@ -28,7 +28,7 @@ def main():
         print("Environment Variable named $TODOIST_TOKEN doesn't exist!")
         sys.exit()
 
-    api = todoist.TodoistAPI(key)
+    api = todoist.TodoistAPI(key,'https://todoist.com',None,None)
     api.sync()
     items = ExList(api.state['items'])\
             .filter(hasDeadLine)\

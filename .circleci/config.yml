@@ -2,18 +2,18 @@ version: 2
 jobs:
   build:
     docker:
-      - image: python:3.6.3-alpine3.6
+      - image: python:3.7.3
     steps:
       - checkout
       - run:
           name: dependency
           command: pip install todoist-python -t .; pip install exlist -t .; pip install awscli
       - run:
-          name: apk-update
-          command: apk update;
+          name: apt-update
+          command: apt update;
       - run:
           name: zip-install
-          command: apk add zip
+          command: apt install zip
       - run:
           name: zip
           command: zip -r upload.zip *
