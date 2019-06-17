@@ -1,6 +1,7 @@
 import os
 import sys
 import datetime
+import copy
 from logging import getLogger, StreamHandler, DEBUG
 import todoist
 from exlist import ExList
@@ -24,10 +25,13 @@ def missDeadLine(item):
 def hasDeadLine(item):
     return item.data['due'] is not None
 
-def reschedule(api, item):
-    content = {'string' : item.data['due']['string']}
+def resetSchedule(api, item, due):
     item.update(due=None)
     api.commit()
+    return (item, due)
+
+def reschedule(api, item, due):
+    content = {'string' : due['string']}
     item.update(due=content)
     api.commit()
 
@@ -42,7 +46,9 @@ def main():
     items = ExList(api.state['items'])\
             .filter(hasDeadLine)\
             .filter(missDeadLine)
-    items.foreach(lambda item: reschedule(api, item))
+    items.map(lambda item: (item, item['due']))\
+         .map(lambda itemAndDue: resetSchedule(api, itemAndDue[0], itemAndDue[1]))\
+         .foreach(lambda itemAndDue: reschedule(api, itemAndDue[0], itemAndDue[1]))
 
 def exe(event, context):
     main()
