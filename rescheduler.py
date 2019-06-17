@@ -1,15 +1,24 @@
 import os
 import sys
 import datetime
-
+from logging import getLogger, StreamHandler, DEBUG
 import todoist
 from exlist import ExList
+
+logger = getLogger(__name__)
+handler = StreamHandler()
+handler.setLevel(DEBUG)
+logger.setLevel(DEBUG)
+logger.addHandler(handler)
+logger.propagate = False
 
 def missDeadLine(item):
     due = item['due']['date']
     date = due + " 23:59:59"
     due_datetime = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
     now = datetime.datetime.now()
+    logger.debug(str(item['id']) + ' ' + item['content'])
+    logger.debug('due -> ' + date + ', now ->' +  now.strftime("%Y-%m-%d %H:%M:%S"))
     return due_datetime < now
 
 def hasDeadLine(item):
