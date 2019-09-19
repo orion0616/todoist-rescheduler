@@ -25,6 +25,9 @@ def missDeadLine(item):
 def hasDeadLine(item):
     return item.data['due'] is not None
 
+def isRecurring(item):
+    return item['due']['is_recurring']
+
 def resetSchedule(api, item, due):
     item.update(due=None)
     api.commit()
@@ -45,7 +48,8 @@ def main():
     api.sync()
     items = ExList(api.state['items'])\
             .filter(hasDeadLine)\
-            .filter(missDeadLine)
+            .filter(missDeadLine)\
+            .filter(isRecurring)
     items.map(lambda item: (item, item['due']))\
          .map(lambda itemAndDue: resetSchedule(api, itemAndDue[0], itemAndDue[1]))\
          .foreach(lambda itemAndDue: reschedule(api, itemAndDue[0], itemAndDue[1]))
