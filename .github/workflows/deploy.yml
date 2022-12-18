@@ -13,11 +13,11 @@ jobs:
       - uses: actions/setup-python@v1
         with:
           python-version: 3.9
-        - run: pip3 install todoist-python -t .; pip3 install exlist -t .;
-        - run: zip -r package.zip ./*
-        - run: pip3 install awscli
-        - run: aws lambda update-function-code --function-name todoist-rescheduler --zip-file fileb://package.zip --publish
-          env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_KEY_ID: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_DEFAULT_REGION: us-west-2
+      - run: pip3 install todoist-python -t .; pip3 install exlist -t .;
+      - run: zip -r package.zip ./*
+      - run: pip3 install awscli
+      - run: aws lambda update-function-code --function-name todoist-rescheduler --zip-file fileb://package.zip --publish
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_KEY_ID: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
