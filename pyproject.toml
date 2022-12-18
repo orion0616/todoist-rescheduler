@@ -1,0 +1,9 @@
+[tool.poetry]
+name = "todoist-rescheduler"
+version = "0.2.0"
+description = "Todoist Rescheduler"
+authors = ["orion0616"]
+
+[tool.poetry.dependencies]
+python = "3.11.1"
+todoist-api-python = "^v2.0.0"

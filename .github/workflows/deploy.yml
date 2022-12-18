@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-python@v1
         with:
           python-version: 3.9
-      - run: pip3 install todoist-python -t .; pip3 install exlist -t .;
+      - run: pip3 install todoist-api-python -t .;
       - run: zip -r package.zip ./*
       - run: pip3 install awscli
       - run: aws lambda update-function-code --function-name todoist-rescheduler --zip-file fileb://package.zip --publish

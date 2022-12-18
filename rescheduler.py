@@ -1,61 +1,46 @@
+import datetime
 import os
 import sys
-import datetime
-import copy
-from logging import getLogger, StreamHandler, DEBUG
-import todoist
-from exlist import ExList
+from todoist_api_python.api import TodoistAPI
 
-logger = getLogger(__name__)
-handler = StreamHandler()
-handler.setLevel(DEBUG)
-logger.setLevel(DEBUG)
-logger.addHandler(handler)
-logger.propagate = False
+def has_recurring_deadline(task):
+    if task.due is None:
+        return False
+    return task.due.is_recurring
 
-def missDeadLine(item):
-    due = item['due']['date']
+def is_after_deadline(task):
+    due = task.due.date
     date = due + " 23:59:59"
     due_datetime = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
     now = datetime.datetime.now()
-    logger.debug(str(item['id']) + ' ' + item['content'])
-    logger.debug('due -> ' + date + ', now ->' +  now.strftime("%Y-%m-%d %H:%M:%S"))
     return due_datetime < now
 
-def hasDeadLine(item):
-    return item.data['due'] is not None
+def get_tasks(api):
+    try:
+        tasks = api.get_tasks()
+        print(str(len(tasks)) + " tasks are gotten.")
+    except Exception as error:
+        print(error)
+    return tasks
 
-def isRecurring(item):
-    return item['due']['is_recurring']
-
-def resetSchedule(api, item, due):
-    item.update(due=None)
-    api.commit()
-    return (item, due)
-
-def reschedule(api, item, due):
-    content = {'string' : due['string']}
-    item.update(due=content)
-    api.commit()
+def reschedule_task(task, api):
+    due = task.due.string
+    api.update_task(task_id = task.id, due_string=due)
 
 def main():
-    key = os.getenv("TODOIST_TOKEN")
-    if key is None:
+    token = os.getenv("TODOIST_TOKEN")
+    if token is None:
         print("Environment Variable named $TODOIST_TOKEN doesn't exist!")
         sys.exit()
+    api = TodoistAPI(token)
+    tasks = get_tasks(api)
+    for task in tasks:
+        if has_recurring_deadline(task) and is_after_deadline(task):
+            reschedule_task(task, api)
 
-    api = todoist.TodoistAPI(key,'https://todoist.com',None,None)
-    api.sync()
-    items = ExList(api.state['items'])\
-            .filter(hasDeadLine)\
-            .filter(missDeadLine)\
-            .filter(isRecurring)
-    items.map(lambda item: (item, item['due']))\
-         .map(lambda itemAndDue: resetSchedule(api, itemAndDue[0], itemAndDue[1]))\
-         .foreach(lambda itemAndDue: reschedule(api, itemAndDue[0], itemAndDue[1]))
 
 def exe(event, context):
     main()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
